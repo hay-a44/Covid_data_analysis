@@ -1,0 +1,114 @@
+#Exploring deaths data  order by countries alphabetically 
+select *
+FROM `project-covid-446202.covid_deaths.covid deaths`
+order by 3, 4
+
+
+#Exploring  vaccinations data  order by countries alphabetically 
+select *
+FROM `project-covid-446202.covid_vaccinations.covid_vaccinations`
+order by 3, 4
+
+
+#TOTAL CASES AND TOTAL DEATHS PERCENTAGE 
+SELECT location, Date, total_cases, total_deaths, (total_deaths/total_cases)*100 as DeathPercentage
+FROM `project-covid-446202.covid_deaths.covid deaths`
+order by 1,2
+
+
+#TOTAL CASES AND TOTAL DEATHS PERCENTAGE IN "CANADA"
+SELECT location, Date, total_cases, total_deaths, (total_deaths/total_cases)*100 as DeathPercentage
+FROM `project-covid-446202.covid_deaths.covid deaths`
+WHERE location like '%Canada%'
+order by 1,2
+
+#LAST REPORT IN THE DATA SET IS FROM 2021-04-30 AND ON THAT DAY IF YOU HAD COVID AND YOU WERE IN CANADA 
+THEN THE SURVIVAL RATE WAS APPROXIMATELY 98%
+
+#TOTAL DEATHS PERCENTAGE OVER POPULATION
+SELECT location, Date, total_cases, population, total_deaths, (total_deaths/population)*100 as populationPercentage
+FROM `project-covid-446202.covid_deaths.covid deaths`
+WHERE location like '%Canada%'
+order by 1,2
+
+#SURPRISING TO SEE THAT CANADA HAD THE HIGHEST DEATHS PERCENTAGE OF 8.7435% ON 2020-03-24 AND IT CHANGED 
+DRASTICALLY TO 0.0001%
+
+
+#TOTAL DEATHS PERCENTAGE OVER POPULATION
+SELECT location, population, MAX(total_cases) as HighestInfection, MAX((total_cases/population))*100 as 
+HighestPopulationInfection
+FROM `project-covid-446202.covid_deaths.covid deaths`
+group by location, population
+order by 4 desc
+
+#Canada is listed at #73 with highest population infection rate at 3.2546 and highest infection 
+reported are 1228367
+
+
+#HIGHEST TOTAL DEATHS IN COUNTRIES
+SELECT location, MAX(cast(total_deaths as int)) as HighestDeath
+FROM `project-covid-446202.covid_deaths.covid deaths`
+where continent is not null
+group by location
+order by HighestDeath desc
+#Canada is on #25 with highest death count of 24220
+
+
+#HIGHEST TOTAL DEATHS BASED ON CONTINENT.
+SELECT location, MAX(cast(total_deaths as int)) as HighestDeath
+FROM `project-covid-446202.covid_deaths.covid deaths`
+where continent is null
+group by location
+order by HighestDeath desc
+
+
+#LOOKING AT GLOBAL NUMBERS OF CASES ON EACH DAY
+SELECT date, SUM(new_cases) as Total_Cases_around_world
+FROM `project-covid-446202.covid_deaths.covid deaths`
+where continent is not null
+group by date
+order by 1,2 
+
+
+#LOOKING AT GLOBAL NUMBERS OF CASES AND DEATHS
+SELECT SUM(new_cases) as Total_Cases_around_world, SUM(cast(new_deaths as int)) as Total_Deaths_around_world, SUM(cast(new_deaths as int))/SUM(new_cases)*100 as Death_Percentage 
+FROM `project-covid-446202.covid_deaths.covid deaths`
+where continent is not null
+order by 1,2 
+
+
+#LOOKING AT GLOBAL NUMBERS OF DEATH PERCENTAGE
+SELECT date, SUM(new_cases) as Total_Cases_around_world, SUM(cast(new_deaths as int)) as Total_Deaths_around_world, SUM(cast(new_deaths as int))/SUM(new_cases)*100 as Death_Percentage 
+FROM `project-covid-446202.covid_deaths.covid deaths`
+where continent is not null
+group by date
+order by 1,2 
+
+
+#LOOKING AT TOTAL POPULATION VS VACCINATON
+SELECT *
+FROM `project-covid-446202.covid_deaths.covid deaths` dea
+Join `project-covid-446202.covid_vaccinations.covid_vaccinations` vac
+  on dea.location = vac.location
+  and dea.date = vac.date
+
+
+
+#USE CTE 
+With PopvsVac AS 
+(
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(Cast(vac.new_vaccinations as int)) OVER (Partition by dea.location order by dea.location, dea.date) as RollingPeopleVaccinated
+, 
+FROM `project-covid-446202.covid_deaths.covid deaths` dea
+Join `project-covid-446202.covid_vaccinations.covid_vaccinations` vac
+  on dea.location = vac.location
+  and dea.date = vac.date
+WHERE dea.continent is not null
+#order by 2,3 
+)
+select*, (RollingPeopleVaccinated/population)*100 as VACCINATEDPERCENTAGE
+FROM PopvsVac
+#THIS SHOWS WHAT PERCENTAGE OF TOTAL POPULATION WAS VACCINATED OVERALL.
+
+
