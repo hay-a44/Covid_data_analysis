@@ -8,6 +8,9 @@ and specifically in Canada.
 Organize and analyze total deaths and vaccination data alphabetically by countries.
 Highlight countries with the highest total deaths and continent-based death distributions.
 
+![tableau dashboard](https://github.com/user-attachments/assets/1d5296a4-e3d3-4932-bf8a-e3aa0f95bc7a)
+
+
 2-Understand Infection and Mortality Rates
 
 Calculate total cases and deaths percentages globally, giving insights into the fatality rate of the virus.
